@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import numpy as np
 
 def convert(pdb_file, pdb_file_path, target_path):
     '''
@@ -41,9 +42,12 @@ def convert(pdb_file, pdb_file_path, target_path):
                 chain_list.append(chain)
     fp.close()
 
-
+    # Creating .txt files for seq within family directory with unique names
     for chain in chain_list:
         name = os.path.join(target_path, chain+'.txt')
+        if os.isfile(name):
+            unique = str(np.random.randint(1,10000))
+            name = os.path.join(target_path,chain+unique+'.txt')
         with open(name, 'w') as f:
             f.write(chain_dict[chain])
         f.close()
@@ -57,7 +61,7 @@ inputPaths='./input/'        #contains HOMSTRAD dataset
 inputFolders = os.listdir(inputPaths)
 # print(inputFolders) 
 
-#Extracts family name for each input elem and creates/adds to necessary directory 
+# Extracts family name for each input elem and creates/adds to necessary directory 
 for folder in inputFolders:
     basepath = inputPaths+folder+'/'
     family_file = folder+'.ali'
@@ -70,14 +74,14 @@ for folder in inputFolders:
     print(c_dir)
     #print(os.path.isdir(c_dir))
 
-    if os.path.isdir(c_dir):
+    if os.path.isdir(c_dir):    
         #print("IF")
         pdb_file = folder + '-sup.pdb'
         pdb_file_path = os.path.join(basepath,pdb_file)
         target_path = c_dir
         convert(pdb_file,pdb_file_path,target_path)
 
-    else:
+    else:   
         os.mkdir(c_dir) 
         pdb_file = folder + '-sup.pdb'
         pdb_file_path = os.path.join(basepath,pdb_file)
