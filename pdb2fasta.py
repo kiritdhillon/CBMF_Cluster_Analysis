@@ -1,57 +1,75 @@
 import sys
 import os
+import re
+
+def convert(pdb_file, pdb_file_path, target_path):
+    aa3to1={
+    'ALA':'A', 'VAL':'V', 'PHE':'F', 'PRO':'P', 'MET':'M',
+    'ILE':'I', 'LEU':'L', 'ASP':'D', 'GLU':'E', 'LYS':'K',
+    'ARG':'R', 'SER':'S', 'THR':'T', 'TYR':'Y', 'HIS':'H',
+    'CYS':'C', 'ASN':'N', 'GLN':'Q', 'TRP':'W', 'GLY':'G',
+    'MSE':'M',
+    }
+
+    ca_pattern=re.compile("^ATOM\s{2,6}\d{1,5}\s{2}CA\s[\sA]([A-Z]{3})\s([\s\w])|^HETATM\s{0,4}\d{1,5}\s{2}CA\s[\sA](MSE)\s([\s\w])")
+
+    chain_dict=dict()
+    chain_list=[]
+
+    fp=open(pdb_file_path,'rU')
+    for line in fp.read().splitlines():
+        if line.startswith("ENDMDL"):
+            break
+        match_list=ca_pattern.findall(line)
+        if match_list:
+            resn=match_list[0][0]+match_list[0][2]
+            chain=match_list[0][1]+match_list[0][3]
+            if chain in chain_dict:
+                chain_dict[chain]+=aa3to1[resn]
+            else:
+                chain_dict[chain]=aa3to1[resn]
+                chain_list.append(chain)
+    fp.close()
+
+
+    for chain in chain_list:
+        name = os.path.join(target_path, chain+'.txt')
+        with open(name, 'w') as f:
+            f.write(chain_dict[chain])
+        f.close()
+        del f
+
+        # sys.stdout.write('> %s\n%s\n'%(chain,chain_dict[chain]))
+
 
 solutionPath='./solutions/'
 inputPaths='./input/'
 inputFolders = os.listdir(inputPaths)
-print(inputFolders) 
-
-def convert(file_name, path):
-    input_file = open(path)
-    letters = {'ALA':'A','ARG':'R','ASN':'N','ASP':'D','CYS':'C','GLU':'E','GLN':'Q','GLY':'G','HIS':'H',
-           'ILE':'I','LEU':'L','LYS':'K','MET':'M','PHE':'F','PRO':'P','SER':'S','THR':'T','TRP':'W',
-           'TYR':'Y','VAL':'V'}
-    prev = '-1'
-    
-    with open(solutionPath+file_name+'.txt', 'w') as f:
-        for line in input_file:
-            toks = line.split()
-            if len(toks)<1: continue
-            if toks[0] != 'ATOM': continue
-            if toks[5] != prev:
-                # print(letters[toks[3]])
-                f.write('%s' % letters[toks[3]])
-            prev = toks[5]
-
-        f.write('\n')
-        f.close()
+# print(inputFolders) 
 
 for folder in inputFolders:
-    x = folder+'-sup.pdb'
-    path=inputPaths+folder+'/'+x
-    print(path)
-    # input_file = open(path)
-    convert(folder,path)
+    basepath = inputPaths+folder+'/'
+    family_file = folder+'.ali'
+    # print(basepath+family_file)
+    family_file_reader = open(basepath+family_file).readline().strip('\n')
+    family_name = family_file_reader[11:]
+    # print(family_name)
+    # print(solutionPath+family_name)
+    c_dir = os.path.join (solutionPath,family_name)
+    print(c_dir)
+    print(os.path.isdir(c_dir))
 
+    if os.path.isdir(c_dir):
+        print("IF")
+        pdb_file = folder + '-sup.pdb'
+        pdb_file_path = os.path.join(basepath,pdb_file)
+        target_path = c_dir
+        convert(pdb_file,pdb_file_path,target_path)
 
-# if len(sys.argv) <= 1:
-#     print('usage: python pdb2fasta.py file.pdb > file.fasta')
-#     exit()
-    
-# input_file = open(sys.argv[1])
+    else:
+        os.mkdir(c_dir) 
+        pdb_file = folder + '-sup.pdb'
+        pdb_file_path = os.path.join(basepath,pdb_file)
+        target_path = c_dir
+        convert(pdb_file,pdb_file_path,target_path)
 
-# letters = {'ALA':'A','ARG':'R','ASN':'N','ASP':'D','CYS':'C','GLU':'E','GLN':'Q','GLY':'G','HIS':'H',
-#            'ILE':'I','LEU':'L','LYS':'K','MET':'M','PHE':'F','PRO':'P','SER':'S','THR':'T','TRP':'W',
-#            'TYR':'Y','VAL':'V'}
-# print('>',sys.argv[1])
-# prev = '-1'
-# for line in input_file:
-#     toks = line.split()
-#     if len(toks)<1: continue
-#     if toks[0] != 'ATOM': continue
-#     if toks[5] != prev:
-#         sys.stdout.write('%c' % letters[toks[3]])
-#     prev = toks[5]
-
-# sys.stdout.write('\n')
-# input_file.close()
