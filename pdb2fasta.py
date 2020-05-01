@@ -16,7 +16,7 @@ def convert(pdb_file, pdb_file_path, target_path):
     chain_dict=dict()
     chain_list=[]
 
-    fp=open(pdb_file_path,'rU')
+    fp=open(pdb_file_path,'r')
     for line in fp.read().splitlines():
         if line.startswith("ENDMDL"):
             break
@@ -57,10 +57,10 @@ for folder in inputFolders:
     # print(solutionPath+family_name)
     c_dir = os.path.join (solutionPath,family_name)
     print(c_dir)
-    print(os.path.isdir(c_dir))
+    #print(os.path.isdir(c_dir))
 
     if os.path.isdir(c_dir):
-        print("IF")
+        #print("IF")
         pdb_file = folder + '-sup.pdb'
         pdb_file_path = os.path.join(basepath,pdb_file)
         target_path = c_dir
