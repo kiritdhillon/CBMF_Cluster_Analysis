@@ -3,6 +3,16 @@ import os
 import re
 
 def convert(pdb_file, pdb_file_path, target_path):
+    '''
+    Given a .pdb file, it's path and path of the family directory to which it belongs, the function generates .txt files 
+    for each seq obtained from the .pdb file.
+    Directory Structure  -
+        Family_name
+           chain 1.txt
+           chain 2.txt
+           ...
+           chain n.txt
+    '''
     aa3to1={
     'ALA':'A', 'VAL':'V', 'PHE':'F', 'PRO':'P', 'MET':'M',
     'ILE':'I', 'LEU':'L', 'ASP':'D', 'GLU':'E', 'LYS':'K',
@@ -42,17 +52,18 @@ def convert(pdb_file, pdb_file_path, target_path):
         # sys.stdout.write('> %s\n%s\n'%(chain,chain_dict[chain]))
 
 
-solutionPath='./solutions/'
-inputPaths='./input/'
+solutionPath='./solutions/'  #result directory
+inputPaths='./input/'        #contains HOMSTRAD dataset
 inputFolders = os.listdir(inputPaths)
 # print(inputFolders) 
 
+#Extracts family name for each input elem and creates/adds to necessary directory 
 for folder in inputFolders:
     basepath = inputPaths+folder+'/'
     family_file = folder+'.ali'
     # print(basepath+family_file)
     family_file_reader = open(basepath+family_file).readline().strip('\n')
-    family_name = family_file_reader[11:]
+    family_name = family_file_reader[11:] 
     # print(family_name)
     # print(solutionPath+family_name)
     c_dir = os.path.join (solutionPath,family_name)
